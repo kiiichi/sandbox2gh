@@ -9,7 +9,7 @@ It documents the token-based workflow that avoids fragile interactive `gh auth l
 From a published GitHub repo:
 
 ```powershell
-npx skills@latest add owner/sandbox2gh -a codex -g
+npx skills@latest add kiiichi/sandbox2gh -a codex -g
 ```
 
 From a local checkout:
