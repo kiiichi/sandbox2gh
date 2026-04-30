@@ -27,7 +27,7 @@ Use $sandbox2gh to configure GitHub CLI access in this project sandbox.
 ```
 
 ```text
-使用 `$sandbox2gh` 在此项目沙箱中配置 GitHub CLI 访问权限。
+使用 $sandbox2gh 在此项目沙箱中配置 GitHub CLI 访问权限。
 ```
 
 ## Token Pattern
