@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sandbox to gh"
+  short_description: "Set up GitHub CLI in Codex sandboxes."
+  default_prompt: "Use $sandbox2gh to configure GitHub CLI access in this project sandbox."

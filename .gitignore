@@ -1,0 +1,5 @@
+.gh-config/
+.scratch-gh-auth.*
+.scratch-py/
+.scratch-tmp/
+*.log
