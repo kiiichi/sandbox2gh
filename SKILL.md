@@ -20,11 +20,32 @@ git remote -v
 Get-Command gh
 ```
 
-2. Create a fine-grained personal access token from GitHub:
+2. Give the user a fine-grained personal access token link and a page checklist.
+
+Start with the prefilled token link, then immediately tell the user what must be checked or changed on the GitHub page. GitHub URL parameters can prefill name, description, owner, expiration, and permissions, but they do not currently preselect `Only select repositories` or the repository itself.
+
+Use this response shape:
+
+- Open this link: `https://github.com/settings/personal-access-tokens/new?name=Codex-owner-repo&description=Codex+sandbox+GitHub+CLI+access+for+owner%2Frepo&target_name=owner&expires_in=90&contents=read&issues=write&pull_requests=write`
+- Before clicking `Generate token`, check or change:
+  - `Repository access`: select `Only select repositories`.
+  - `Selected repositories`: select `repo`.
+  - `Expiration`: use the shortest practical value, such as 90 days.
+  - `Contents`: use `Read-only`, or `Read and write` only if Codex must push branches.
+  - `Issues`: use `Read and write`.
+  - `Pull requests`: use `Read and write`.
+- Do not paste the token into chat.
+- Store it in a project-specific variable:
+
+```powershell
+[Environment]::SetEnvironmentVariable("GH_TOKEN_ProjectName", "<token>", "User")
+```
+
+Useful links:
 
 - New fine-grained token page: https://github.com/settings/personal-access-tokens/new
 - GitHub instructions: https://docs.github.com/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line
-- Optional prefilled template:
+- Prefilled template:
 
 ```text
 https://github.com/settings/personal-access-tokens/new?name=Codex-owner-repo&description=Codex+sandbox+GitHub+CLI+access&target_name=owner&expires_in=90&contents=read&issues=write&pull_requests=write
@@ -141,11 +162,55 @@ Success means GitHub access works for the sandbox, even if the default credentia
 
 Tell the user not to paste the token into chat. Have them create a fine-grained GitHub personal access token and store it as a user environment variable.
 
+Make the response procedural and easy to test:
+
+1. State what was detected:
+   - repository slug, such as `owner/repo`
+   - GitHub CLI path
+   - project token variable name, such as `GH_TOKEN_RepoName`
+
+2. Give one direct link:
+
+```text
+https://github.com/settings/personal-access-tokens/new?name=Codex-owner-repo&description=Codex+sandbox+GitHub+CLI+access+for+owner%2Frepo&target_name=owner&expires_in=90&contents=read&issues=write&pull_requests=write
+```
+
+3. Immediately list exactly what the user must check on the GitHub page:
+
+- `Repository access`: select `Only select repositories`.
+- `Selected repositories`: select `repo`.
+- `Contents`: select `Read-only`, unless the agent must push branches; then select `Read and write`.
+- `Issues`: select `Read and write`.
+- `Pull requests`: select `Read and write`.
+- `Expiration`: use the shortest practical value.
+
+4. Tell the user how to store it without exposing the secret:
+
+```powershell
+[Environment]::SetEnvironmentVariable("GH_TOKEN_RepoName", "<token>", "User")
+```
+
+5. Tell the user to restart Codex or open a fresh terminal after setting a user environment variable.
+
+6. Finish with the exact validation command the agent will run next:
+
+```powershell
+[System.Environment]::SetEnvironmentVariable("PATH", $null, "Process")
+$token = [Environment]::GetEnvironmentVariable("GH_TOKEN_RepoName", "User")
+if (-not $token) { $token = [Environment]::GetEnvironmentVariable("GH_TOKEN_RepoName", "Machine") }
+if (-not $token) { $token = $env:GH_TOKEN_RepoName }
+if (-not $token) { throw "GH_TOKEN_RepoName not found" }
+$env:GH_TOKEN = $token
+gh repo view owner/repo --json nameWithOwner,url,viewerPermission
+```
+
+If the user says the token page still shows `All repositories`, explain that this is expected. GitHub's supported URL parameters do not include repository access mode or selected repositories. The user must change `Repository access` manually on the page.
+
 Token creation pages:
 
 - Direct token form: https://github.com/settings/personal-access-tokens/new
 - GitHub docs: https://docs.github.com/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line
-- Prefilled template:
+- Prefilled template. This cannot preselect `Only select repositories`; the user must change that manually on the GitHub page:
 
 ```text
 https://github.com/settings/personal-access-tokens/new?name=Codex-owner-repo&description=Codex+sandbox+GitHub+CLI+access&target_name=owner&expires_in=90&contents=read&issues=write&pull_requests=write
